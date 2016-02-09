@@ -53,10 +53,8 @@ class Agent:
         ## Where a is the input list
         #t = float(sum(a))
         #out = [x/t for x in a]
-        self.parseProblem(problem)
-        #compare A and B
-        transformationsAB=[]
-        self.getRelationship(self.frames['A'], self.frames['B'])
+        self.parseProblem(problem) #parseproblem into frames
+        transAB = self.getRelationship(self.frames['A'], self.frames['B']) #compare A and B
 
         return [.05,.1,.11,.12,.13,.14,.15,.2]
 
@@ -65,5 +63,43 @@ class Agent:
             self.frames[key] = problem.figures[key].objects
 
     def getRelationship(self, frame1, frame2):
+        transformations = {} #dictionary of transformation, 1st key=object, 2nd key = attribute
+        #find out if any object has been deleted or added
+        if len(frame1)>len(frame2): #something has been deleted
+            scoredict={}
+            for key in frame1:
+                obj1=frame1[key]
+                scoredict[key] = {}
+                obj1key = key
+                for key in frame2:
+                    simscore = 0
+                    obj2 = frame2[key]
+                    obj2key = key
+                    for key in obj1.attributes:
+                        if key in obj2.attributes:
+                            if obj1.attributes[key]==obj2.attributes[key]:
+                                simscore+=1
+                    scoredict[obj1key][obj2key] = simscore
+            difference = self.findDiff(scoredict)
+            transformations['deleted'] = difference
 
         return None
+
+    def findDiff(self, scoredict):
+        max = {}
+        diff=[]
+        std=next(iter (scoredict.values()))
+        for key in std:
+            obj2 = key
+            maxval = 0
+            maxkey = None
+            for key in scoredict:
+                value=scoredict[key][obj2]
+                if value>=maxval:
+                    maxval =value
+                    maxkey = key
+            max[maxkey] = obj2
+        for key in scoredict:
+            if key not in max:
+                diff.append(key)
+        return diff
