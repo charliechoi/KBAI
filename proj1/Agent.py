@@ -82,7 +82,23 @@ class Agent:
                     scoredict[obj1key][obj2key] = simscore
             difference = self.findDiff(scoredict)
             transformations['deleted'] = difference
-
+        elif len(frame1)<len(frame2):
+            scoredict={}
+            for key in frame2:
+                obj2=frame2[key]
+                scoredict[key] = {}
+                obj2key = key
+                for key in frame1:
+                    simscore = 0
+                    obj1 = frame1[key]
+                    obj1key = key
+                    for key in obj2.attributes:
+                        if key in obj1.attributes:
+                            if obj1.attributes[key]==obj2.attributes[key]:
+                                simscore+=1
+                    scoredict[obj2key][obj1key] = simscore
+            difference = self.findDiff(scoredict)
+            transformations['deleted'] = difference
         return None
 
     def findDiff(self, scoredict):
