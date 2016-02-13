@@ -84,6 +84,7 @@ class Agent:
                 #print(scores)
                 (difference, connected) = self.findDiff(scores)
                 translation = self.compAnswer(case, figure, connected)
+                print(translation)
                 maxscore = len(translation)
                 for key in translation:
                     if len(translation[key])==0:
@@ -96,6 +97,8 @@ class Agent:
         if 100 in probability:
             probability = [0 if x is not 100 else 1 for x in probability]
             probability = [1.0 if x is not 0 else x for x in probability]
+            total = sum(probability)
+            probability=[x/total for x in probability]
         else:
             probability = [x/total for x in probability]
         print(probability)
@@ -130,10 +133,13 @@ class Agent:
                             if key!='alignment':
                                 if tf[obj][1]!='None':
                                     if key=='angle':
-                                        difference = int(frameC[obj].attributes[key])-int(tf[obj][1])
-                                        if difference>360:
-                                            difference = difference-360
-                                        newframe[obj][key] = str(difference)
+                                        difference = [(int(frameC[obj].attributes[key])+int(tf[obj][1])), (int(frameC[obj].attributes[key])-int(tf[obj][1]))]
+                                        difference=[(x-360) if x>360 else x for x in difference]
+                                        difference=[abs(x) if x<0 else x for x in difference]
+                                        difference=[str(x) for x in difference]
+                                        print("angle difference: ")
+                                        print(difference)
+                                        newframe[obj][key] = difference
                                     else:
                                         newframe[obj][key] = tf[obj][1]
                             else:
@@ -268,6 +274,16 @@ class Agent:
                                 choice2testKey = connected[choicekey]
                                 if choice2testKey==testkey:
                                     abstransform[att][key] = {}
+                                else:
+                                    abstransform[att][key] = [L[att], S[att]]
+                        elif att=='angle':
+                            choicekey=S[att]
+                            #print('choicekey: '+choicekey)
+                            for angle in L[att]:
+                                if angle==choicekey:
+                                    abstransform[att] = {}
+                                    #print(angle)
+                                    break
                                 else:
                                     abstransform[att][key] = [L[att], S[att]]
                         else:
